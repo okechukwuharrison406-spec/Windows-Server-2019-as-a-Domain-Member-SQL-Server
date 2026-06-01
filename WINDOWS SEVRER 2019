@@ -1,0 +1,97 @@
+# 🖥️ Lab 3: Windows Server 2019 — Domain Member & SQL Server
+
+**Installation → Configuration → Domain Join → SQL Server 2019 → Verification**
+
+---
+
+## Overview
+
+Install Windows Server 2019 from scratch and configure it as an Active Directory domain member server running SQL Server 2019. This replicates a real enterprise database server integrated into an AD domain environment.
+
+## Prerequisites
+
+- ✅ Working Windows Server 2022 Domain Controller (Lab 1)
+- ✅ Windows Server 2019 ISO
+- ✅ SQL Server 2019 Express installer
+- ✅ SQL Server Management Studio (SSMS) installer
+- ✅ VMware/VirtualBox with 4GB RAM, 60GB disk, 2 vCPU
+- ✅ Isolated internal virtual network (same as DC)
+
+## Lab Environment Specifications
+
+| Component | Specification | Notes |
+|-----------|---------------|-------|
+| Platform | VMware / VirtualBox | Any version supporting Server 2019 |
+| OS | Windows Server 2019 Standard Desktop Experience | GUI required for this lab |
+| RAM | 4GB minimum (8GB recommended) | Server 2019 runs leaner than Windows 11 |
+| Storage | 60GB virtual disk | Use dynamic allocation |
+| CPU | 2 vCPUs minimum | No TPM required |
+| Network | Internal/Host-Only | Must match DC network |
+| Role | Domain Member Server | Not a domain controller |
+
+---
+
+## Installation Procedure
+
+### Phase 1: Virtual Machine Creation
+
+#### Step 01 — Create the Virtual Machine
+
+1. Open VMware Workstation / VirtualBox
+2. Create a new virtual machine
+3. Select Windows Server 2019 ISO as installer disc
+4. Name the VM (e.g., `DB-Server01`, `AppServer01`)
+5. Set disk size: **60GB** → store as single file
+6. Customize hardware:
+   - Memory: **4096 MB** (8192 MB recommended)
+   - Processors: **2 vCPUs**
+   - Network Adapter: Set to **same internal network as Domain Controller**
+   - Skip TPM (not required for Server 2019)
+7. Power on the VM
+
+---
+
+### Phase 2: Windows Server 2019 Installation
+
+#### Step 02 — Boot from ISO and Begin Installation
+
+1. Press any key to boot from ISO when prompted
+2. Select installation language, time/currency format, keyboard input → **Next**
+3. Click **Install now**
+4. Select operating system edition:
+   - Choose: **Windows Server 2019 Standard (Desktop Experience)** ✅
+   - Avoid: Server Core editions (CLI only)
+5. Accept license terms → **Next**
+6. Select **Custom: Install Windows only (advanced)**
+
+#### Step 03 — Partition Disk and Install
+
+1. On disk selection screen → click **New** to create partition
+2. Click **Apply** (Windows creates system partitions automatically)
+3. Select the **largest Primary partition** → **Next**
+4. Windows installation begins (files copy, features install, updates run)
+5. Server restarts automatically multiple times — **do not interrupt**
+6. Installation completes when **Customize settings screen appears**
+
+#### Step 04 — Set Administrator Password (First Boot)
+
+1. After final restart, **Customize settings screen** appears
+2. Enter strong Administrator password → confirm password → **Finish**
+3. Windows logs in to desktop
+4. **Server Manager** opens automatically (primary management tool)
+
+---
+
+### Phase 3: Initial Server Configuration
+
+#### Step 05a — Set Computer Name
+
+1. In **Server Manager Dashboard** → click **Local Server** (left pane)
+2. Click the **Computer Name** link (blue, e.g., WIN-XXXXXXXXX)
+3. **System Properties** opens → click **Change** (under Computer Name tab)
+4. Enter meaningful server name (e.g., `DB-Server01`)
+5. Click **OK** → **OK** → click **Restart Now**
+
+**Alternative (PowerShell):**
+```powershell
+Rename-Computer -NewName 'DB-Server01' -Restart
